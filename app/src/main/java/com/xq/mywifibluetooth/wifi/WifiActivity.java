@@ -18,8 +18,10 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.xq.mywifibluetooth.R;
+import com.xq.mywifibluetooth.util.TimeUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,7 +92,7 @@ public class WifiActivity extends Activity implements View.OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            String time = getTime();
+            String time = TimeUtil.getTime();
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(time)
                     .append("\n")
@@ -121,24 +123,24 @@ public class WifiActivity extends Activity implements View.OnClickListener {
         }
     };
 
-    private String getTime() {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
-        Date date = new Date(System.currentTimeMillis());
-        return format.format(date);
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bt_open:
                 if (!mWifiManager.isWifiEnabled()) {
                     mWifiManager.setWifiEnabled(true);
+                    Toast.makeText(getApplicationContext(), "wifi打开成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "wifi已经打开", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             case R.id.bt_close:
                 if (mWifiManager.isWifiEnabled()) {
                     mWifiManager.setWifiEnabled(false);
+                    Toast.makeText(getApplicationContext(), "WiFi关闭成功", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "wifi已经关闭", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
