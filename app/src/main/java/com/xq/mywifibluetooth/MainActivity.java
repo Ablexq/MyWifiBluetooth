@@ -8,27 +8,38 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.widget.TextView;
 
 import com.xq.mywifibluetooth.wifi.WifiReceiver;
 import com.xq.mywifibluetooth.wifi.WifiService;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends Activity {
 
     private LocalBroadcastManager mLocalBroadcastManager;
-    private TextView mTv;
+    private ArrayList<String> msgLists = new ArrayList<>();
+    private MyAdapter myAdapter;
+
+    public MainActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTv = ((TextView) this.findViewById(R.id.text));
-
+        RecyclerView recyclerView = (RecyclerView) this.findViewById(R.id.rv_msg);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        layoutManager.setOrientation(OrientationHelper.VERTICAL);
+        myAdapter = new MyAdapter(this, msgLists);
+        recyclerView.setAdapter(myAdapter);
 
         startService(new Intent(this, WifiService.class));
 
@@ -76,7 +87,8 @@ public class MainActivity extends Activity {
                     }
                 }
             }
-            mTv.setText(stringBuilder.toString());
+            msgLists.add(stringBuilder.toString());
+            myAdapter.notifyDataSetChanged();
         }
     };
 
