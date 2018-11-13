@@ -16,7 +16,6 @@ import android.os.Parcelable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.xq.mywifibluetooth.MainActivity;
 import com.xq.mywifibluetooth.R;
 
 /**
@@ -54,6 +53,7 @@ public class WifiReceiver extends BroadcastReceiver {
             } else {
                 sendNotification(context, 3000, "网络是否连接", "未连接WiFi或GPRS");
             }
+            setMessage(context);
         }
     }
 
@@ -69,7 +69,6 @@ public class WifiReceiver extends BroadcastReceiver {
                 boolean isConnected = (state == NetworkInfo.State.CONNECTED);
                 if (isConnected) {
                     sendNotification(context, 2000, "Wifi网络是否连接", "是");
-                    setMessage(context);
                 } else {
                     sendNotification(context, 2000, "Wifi网络是否连接", "否");
                 }
@@ -108,7 +107,7 @@ public class WifiReceiver extends BroadcastReceiver {
 
     private void sendNotification(Context context, int notifyId, String title, String message) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, WifiActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
         Notification notification = new Notification.Builder(context)
                 .setSmallIcon(R.mipmap.ic_launcher)
