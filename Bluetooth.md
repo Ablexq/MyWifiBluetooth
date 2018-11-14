@@ -13,7 +13,7 @@
 
 [Android获取本机蓝牙地址](https://blog.csdn.net/chengjiamei/article/details/78833281)
 
-[]()
+[android 蓝牙设备监听广播](https://www.cnblogs.com/lesliefang/p/5445684.html)
 
 
 # 蓝牙强度Rssi的取值范围
