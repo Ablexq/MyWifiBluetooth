@@ -5,7 +5,7 @@ import android.app.Application;
 
 public class MyApplication extends Application {
 
-    private MyApplication myApplication;
+    private static MyApplication myApplication;
 
     @Override
     public void onCreate() {
@@ -13,7 +13,7 @@ public class MyApplication extends Application {
         myApplication = this;
     }
 
-    public MyApplication getInstance() {
+    public static MyApplication getInstance() {
         return myApplication;
     }
 }

@@ -15,12 +15,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xq.mywifibluetooth.R;
+import com.xq.mywifibluetooth.util.ExcelUtil;
 import com.xq.mywifibluetooth.util.NotificationUtil;
 import com.xq.mywifibluetooth.util.TimeUtil;
 import com.xq.mywifibluetooth.wifi.MyAdapter;
@@ -149,6 +151,8 @@ public class BluetoothActivity extends AppCompatActivity implements View.OnClick
             if (device != null) {
                 name = device.getName();
             }
+            String [] sheets = {"设备名称", "连接的设备名称", "状态", "信号强度"};
+            String [] codeList = {};
             switch (action) {
                 case BluetoothDevice.ACTION_ACL_CONNECTED:
                     Toast.makeText(context, "蓝牙设备:" + name + "已链接", Toast.LENGTH_SHORT).show();
@@ -158,6 +162,7 @@ public class BluetoothActivity extends AppCompatActivity implements View.OnClick
                     NotificationUtil.sendNotification(context.getApplicationContext(),
                             NotificationUtil.NOTIFIED_4,
                             "连接的蓝牙设备", "名称：" + name + "     信号强度：" + rssi);
+                    codeList = new String[]{getBtAddressByReflection(),name, "已连接", String.valueOf(rssi)};
                     break;
 
                 case BluetoothDevice.ACTION_ACL_DISCONNECTED:
@@ -168,47 +173,60 @@ public class BluetoothActivity extends AppCompatActivity implements View.OnClick
                     NotificationUtil.sendNotification(context.getApplicationContext(),
                             NotificationUtil.NOTIFIED_4,
                             "断开的蓝牙设备", "名称：" + name + "     信号强度：" + rssi);
+                    sheets = new String[]{"设备名称", "连接的设备名称", "状态", "信号强度"};
+                    codeList = new String[]{getBtAddressByReflection(),name, "已断开", String.valueOf(rssi)};
                     break;
 
                 case BluetoothDevice.ACTION_BOND_STATE_CHANGED:
                     System.out.println("=================ACTION_BOND_STATE_CHANGED======================");
                     if (device != null) {
+                        String status = "";
                         switch (device.getBondState()) {
                             case BluetoothDevice.BOND_NONE:
-                                System.out.println("==================取消配对=======================");
+                                status = "取消配对";
                                 break;
                             case BluetoothDevice.BOND_BONDING:
-                                System.out.println("==================配对中=======================");
+                                status = "配对中";
                                 break;
                             case BluetoothDevice.BOND_BONDED:
-                                System.out.println("==================配对成功=======================");
+                                status = "配对成功";
                                 break;
                         }
+                        System.out.println("=================="+status+"=======================");
+                        codeList = new String[]{status};
                     }
                     break;
 
                 case BluetoothAdapter.ACTION_STATE_CHANGED:
                     int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+                    String statusMsg = "";
                     switch (state) {
                         case BluetoothAdapter.STATE_OFF:
-                            System.out.println("==================手机蓝牙关闭=======================");
+                            statusMsg = "蓝牙已关闭";
                             setMac();
                             break;
                         case BluetoothAdapter.STATE_TURNING_OFF:
-                            System.out.println("==================手机蓝牙正在关闭=======================");
+                            statusMsg = "蓝牙正在关闭";
                             break;
                         case BluetoothAdapter.STATE_ON:
-                            System.out.println("==================手机蓝牙开启=======================");
+                            statusMsg = "蓝牙已开启";
                             setMac();
                             break;
                         case BluetoothAdapter.STATE_TURNING_ON:
-                            System.out.println("==================手机蓝牙正在开启=======================");
+                            statusMsg = "蓝牙正在开启";
                             break;
                     }
+                    System.out.println("=================="+statusMsg+"=======================");
+                    codeList = new String[]{statusMsg};
                     break;
 
                 default:
                     break;
+            }
+            try {
+                ExcelUtil.saveExcel(codeList, sheets, "蓝牙");
+            } catch (Exception e) {
+                Log.e("BAG", "蓝牙数据写入excel失败", e);
             }
         }
     };

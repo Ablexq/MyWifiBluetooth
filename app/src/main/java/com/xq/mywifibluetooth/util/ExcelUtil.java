@@ -4,6 +4,8 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.xq.mywifibluetooth.MyApplication;
+
 import java.io.File;
 
 import jxl.Workbook;
@@ -26,17 +28,22 @@ public class ExcelUtil {
         }
     }
 
-    public static void saveExcel(String[] codeList, String[] sheets) throws Exception{
+    public static void saveExcel(String[] codeList, String[] sheets, String sheetName) throws Exception{
         String excelPath = getExcelDir()+ File.separator+"wify与蓝牙记录表.xls";
         File file = new File(excelPath);
         WritableSheet ws = null;
         WritableWorkbook wwb = null;
         if (!file.exists()) {
             wwb = Workbook.createWorkbook(file);
-            ws = wwb.createSheet("wifi信息", 0);
-            // 在指定单元格插入数据
+            WritableSheet ws1 = wwb.createSheet(sheetName, 0);
+            WritableSheet ws2 = wwb.createSheet(sheetName, 1);
+            if(null!=sheetName && "wify".equals(sheetName)){
+                ws = ws1;
+            }else {
+                ws = ws2;
+            }
             int i = 0;
-            for(String sheet:sheets){
+            for(String sheet:sheets){   // 在指定单元格插入数据
                 Label lbl = new Label(i, 0, sheet);
                 ws.addCell(lbl);
                 i++;
@@ -44,12 +51,16 @@ public class ExcelUtil {
         }else {
             Workbook oldWwb = Workbook.getWorkbook(file);
             wwb = Workbook.createWorkbook(file, oldWwb);
-            ws = wwb.getSheet(0);
+            if(null!=sheetName && "wify".equals(sheetName)){
+                ws = wwb.getSheet(0);
+            }else {
+                ws = wwb.getSheet(1);
+            }
         }
         addExcelData(codeList, ws);
         wwb.write();
         wwb.close();
-        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
+        Toast.makeText(MyApplication.getInstance(), "保存成功", Toast.LENGTH_SHORT).show();
     }
 
     public static void addExcelData(String [] codeList, WritableSheet ws) throws Exception {
