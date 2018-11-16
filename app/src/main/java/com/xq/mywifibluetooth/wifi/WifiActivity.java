@@ -1,6 +1,5 @@
 package com.xq.mywifibluetooth.wifi;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,12 +9,14 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -23,9 +24,13 @@ import android.widget.Toast;
 import com.xq.mywifibluetooth.R;
 import com.xq.mywifibluetooth.util.TimeUtil;
 
-import java.text.SimpleDateFormat;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
+
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
 
 public class WifiActivity extends Activity implements View.OnClickListener {
 
@@ -116,12 +121,72 @@ public class WifiActivity extends Activity implements View.OnClickListener {
                     if (!TextUtils.isEmpty(rssi)) {
                         stringBuilder.append("rssi : ").append(rssi).append("\n");
                     }
+                    try {
+                        saveExcel(bssid, ssid, ip, rssi);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             msgLists.add(stringBuilder.toString());
             myAdapter.notifyDataSetChanged();
         }
+
     };
+
+    public static String getExcelDir() {
+        // SD卡指定文件夹
+        String sdcardPath = Environment.getExternalStorageDirectory().toString();
+        File dir = new File(sdcardPath + File.separator + "Excel"+ File.separator + "Person");
+        if (dir.exists()) {
+            return dir.toString();
+        } else {
+            dir.mkdirs();
+            Log.e("BAG", "保存路径不存在,");
+            return dir.toString();
+        }
+    }
+
+    private void saveExcel(String bssid, String ssid, String ip, String rssi) throws Exception{
+        String excelPath = getExcelDir()+ File.separator+"wify与蓝牙记录表.xls";
+        File file = new File(excelPath);
+        WritableSheet ws = null;
+        WritableWorkbook wwb = null;
+        if (!file.exists()) {
+            wwb = Workbook.createWorkbook(file);
+            ws = wwb.createSheet("wifi信息", 0);
+            // 在指定单元格插入数据
+            Label lbl1 = new Label(0, 0, "bssid");
+            Label lbl2 = new Label(1, 0, "ssid");
+            Label lbl3 = new Label(2, 0, "ip");
+            Label lbl4 = new Label(3, 0, "rssi");
+            ws.addCell(lbl1);
+            ws.addCell(lbl2);
+            ws.addCell(lbl3);
+            ws.addCell(lbl4);
+        }else {
+            Workbook oldWwb = Workbook.getWorkbook(file);
+            wwb = Workbook.createWorkbook(file, oldWwb);
+            ws = wwb.getSheet(0);
+        }
+        addExcelData(bssid, ssid, ip, rssi, ws);
+        wwb.write();
+        wwb.close();
+        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
+    }
+
+    public void addExcelData(String bssid, String ssid, String ip, String rssi, WritableSheet ws) throws Exception {
+        // 当前行数
+        int row = ws.getRows();
+        Label lab1 = new Label(0, row, bssid);
+        Label lab2 = new Label(1, row, ssid);
+        Label lab3 = new Label(2, row, ip);
+        Label lab4 = new Label(3, row, rssi);
+        ws.addCell(lab1);
+        ws.addCell(lab2);
+        ws.addCell(lab3);
+        ws.addCell(lab4);
+    }
 
     @Override
     public void onClick(View v) {
